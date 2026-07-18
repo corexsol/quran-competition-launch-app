@@ -19,9 +19,7 @@ EXPECTED_ASSETS = {
     "icon-180.png",
     "icon-192.png",
     "icon-512.png",
-    "page-1-gold-mask.png",
     "page-1.png",
-    "page-2-gold-mask.png",
     "page-2.png",
 }
 

@@ -13,8 +13,6 @@
     <link rel="icon" type="image/png" href="assets/icon-192.png">
     <link rel="preload" as="image" href="assets/page-1.png">
     <link rel="preload" as="image" href="assets/page-2.png">
-    <link rel="preload" as="image" href="assets/page-1-gold-mask.png">
-    <link rel="preload" as="image" href="assets/page-2-gold-mask.png">
     <link rel="stylesheet" href="style.css">
     <script src="app.js" defer></script>
   </head>
@@ -24,11 +22,9 @@
         <img class="page-backdrop" src="assets/page-1.png" alt="" draggable="false">
         <div class="page-frame">
           <img class="page-art" src="assets/page-1.png" alt="صفحة تدشين مسابقة الملك عبدالعزيز الدولية" draggable="false">
-          <div class="gold-shimmer shimmer-page-one" aria-hidden="true"></div>
           <button id="start-button" class="start-button" type="button" aria-label="ابدأ" disabled>
             <span class="start-feedback">
-              <span class="start-orbit" aria-hidden="true"></span>
-              <span class="start-halo" aria-hidden="true"></span>
+              <span class="start-outline" aria-hidden="true"></span>
             </span>
           </button>
         </div>
@@ -37,10 +33,8 @@
         <img class="page-backdrop" src="assets/page-2.png" alt="" draggable="false">
         <div class="page-frame">
           <img class="page-art" src="assets/page-2.png" alt="هوية مسابقة الملك عبدالعزيز الدولية" draggable="false">
-          <div class="gold-shimmer shimmer-page-two" aria-hidden="true"></div>
         </div>
       </section>
-      <div class="gold-glow" aria-hidden="true"></div>
     </main>
   </body>
 </html>

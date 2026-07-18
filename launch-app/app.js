@@ -6,7 +6,7 @@
   const screenStart = document.getElementById("screen-start");
   const screenCeremony = document.getElementById("screen-ceremony");
   const criticalImages = Array.from(document.querySelectorAll("img"));
-  const FORWARD_DURATION = 1900;
+  const FORWARD_DURATION = 700;
   const RETURN_DURATION = 600;
   const RETURN_WINDOW = 900;
   const BLOCKED_EVENTS = [

@@ -110,7 +110,7 @@ async function loadAppHarness() {
 async function loadLaunchedAppHarness() {
   const app = await loadAppHarness();
   app.button.click();
-  app.runTimer(1900);
+  app.runTimer(700);
   return app;
 }
 
@@ -118,6 +118,8 @@ test("enables start after mixed image decode outcomes using allSettled readiness
   const app = await loadAppHarness();
 
   assert.match(app.source, /Promise\.allSettled\(/);
+  assert.match(app.source, /const FORWARD_DURATION = 700;/);
+  assert.match(app.source, /const RETURN_DURATION = 600;/);
   assert.equal(app.button.disabled, false);
   assert.equal(app.classes.has("app-loading"), false);
   assert.equal(app.classes.has("app-ready"), true);
@@ -129,11 +131,11 @@ test("guards launch, returns on three fast taps, and launches again", async () =
   app.button.click();
   app.button.click();
   assert.notEqual(app.button.listenerOptions.once, true);
-  assert.equal(app.pendingTimers(1900), 1);
+  assert.equal(app.pendingTimers(700), 1);
   assert.equal(app.startAttribute("aria-hidden"), "true");
   assert.equal(app.ceremony.attribute("aria-hidden"), "false");
 
-  app.runTimer(1900);
+  app.runTimer(700);
   assert.equal(app.classes.has("is-launching"), false);
   assert.equal(app.classes.has("is-launched"), true);
 
@@ -154,7 +156,7 @@ test("guards launch, returns on three fast taps, and launches again", async () =
   assert.equal(app.button.disabled, false);
 
   app.button.click();
-  assert.equal(app.pendingTimers(1900), 1);
+  assert.equal(app.pendingTimers(700), 1);
 });
 
 test("ignores return taps outside ceremony state", async () => {
@@ -173,7 +175,7 @@ test("ignores return taps outside ceremony state", async () => {
   }
   assert.equal(app.classes.has("is-launching"), true);
   assert.equal(app.classes.has("is-returning"), false);
-  assert.equal(app.pendingTimers(1900), 1);
+  assert.equal(app.pendingTimers(700), 1);
 });
 
 test("does not return for incomplete or slow tap sequences", async () => {

@@ -39,8 +39,10 @@ class StaticAppTests(unittest.TestCase):
         self.assertIn('id="screen-ceremony"', html)
         self.assertEqual(html.count('src="assets/page-1.png"'), 2)
         self.assertEqual(html.count('src="assets/page-2.png"'), 2)
-        self.assertIn('assets/page-1-gold-mask.png', html)
-        self.assertIn('assets/page-2-gold-mask.png', html)
+        self.assertNotIn('assets/page-1-gold-mask.png', html)
+        self.assertNotIn('assets/page-2-gold-mask.png', html)
+        self.assertNotIn('gold-shimmer', html)
+        self.assertNotIn('gold-glow', html)
         self.assertNotIn('statistics.png', html)
 
     def test_html_preserves_pwa_and_start_button_contracts(self):
@@ -62,8 +64,7 @@ class StaticAppTests(unittest.TestCase):
         self.assertIsNotNone(button)
         feedback = re.fullmatch(
             r'\s*<span class="start-feedback">\s*'
-            r'<span class="start-orbit" aria-hidden="true"></span>\s*'
-            r'<span class="start-halo" aria-hidden="true"></span>\s*'
+            r'<span class="start-outline" aria-hidden="true"></span>\s*'
             r'</span>\s*',
             button.group("body"),
             re.DOTALL,
@@ -92,22 +93,39 @@ class StaticAppTests(unittest.TestCase):
         ):
             self.assertIn(contract, css)
 
-    def test_css_contains_contained_page_blurred_duplicate_and_overlay_motion(self):
+    def test_css_contains_seamless_page_extension_and_quiet_motion(self):
         css = (APP / "style.css").read_text(encoding="utf-8")
         for contract in (
             "aspect-ratio: 16 / 9",
             "object-fit: cover",
-            "filter: blur(",
+            "inset: -9%",
+            "width: 118%",
+            "height: 118%",
+            "filter: blur(12px) brightness(0.72) saturate(0.94)",
+            "left: -1px",
+            "width: calc(100vw + 2px)",
             "min-width: 300px",
             "min-height: 300px",
             "top: 66.4%",
-            "page-1-gold-mask.png",
-            "page-2-gold-mask.png",
-            "@keyframes ring-rotate",
-            "@keyframes halo-pulse",
-            "@keyframes shimmer-sweep",
+            "border: 2px solid rgba(234, 207, 119, 0.68)",
+            "animation: outline-breathe 3.2s ease-in-out infinite",
         ):
             self.assertIn(contract, css)
+        for removed in (
+            "gold-mask",
+            ".gold-shimmer",
+            ".gold-glow",
+            ".start-orbit",
+            ".start-halo",
+            "ring-rotate",
+            "halo-pulse",
+            "shimmer-sweep",
+            "glow-expand",
+            "conic-gradient",
+            "box-shadow:",
+        ):
+            self.assertNotIn(removed, css)
+        self.assertNotIn("transform:", css_block(css, "@keyframes outline-breathe"))
 
     def test_css_blocks_viewport_gestures_while_preserving_button_taps(self):
         css = (APP / "style.css").read_text(encoding="utf-8")
@@ -138,7 +156,7 @@ class StaticAppTests(unittest.TestCase):
     def test_css_has_forward_and_reverse_screen_state_hooks(self):
         css = (APP / "style.css").read_text(encoding="utf-8")
         for contract in (
-            "--transition-duration: 1900ms",
+            "--transition-duration: 700ms",
             "--return-duration: 600ms",
             ".is-launching .screen-start",
             ".is-launching .screen-ceremony",
@@ -165,7 +183,7 @@ class StaticAppTests(unittest.TestCase):
             feedback_rule.group("body"), r"transition:\s*transform\s+100ms\b"
         )
         self.assertIsNotNone(active_rule)
-        self.assertRegex(active_rule.group("body"), r"transform:\s*scale\(0?\.96\)\s*;")
+        self.assertRegex(active_rule.group("body"), r"transform:\s*scale\(0?\.98\)\s*;")
         self.assertNotRegex(
             css,
             r"\.start-button:active:not\(:disabled\)\s*\{[^}]*scale\(",

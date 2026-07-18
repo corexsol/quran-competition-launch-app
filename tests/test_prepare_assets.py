@@ -15,7 +15,7 @@ MASTER_PDF = Path(os.environ["SOURCE_MASTER_PDF"])
 
 
 class PrepareAssetsTests(unittest.TestCase):
-    def test_generates_pdf_faithful_pages_masks_and_icons(self):
+    def test_generates_pdf_faithful_pages_and_icons(self):
         with tempfile.TemporaryDirectory() as temporary:
             output_dir = Path(temporary)
             prepare_assets(MASTER_PDF, output_dir)
@@ -27,18 +27,6 @@ class PrepareAssetsTests(unittest.TestCase):
                 with Image.open(output_dir / name) as page:
                     self.assertEqual(page.size, (2160, 1215))
                     self.assertEqual(page.mode, "RGB")
-            for name in ("page-1-gold-mask.png", "page-2-gold-mask.png"):
-                with Image.open(output_dir / name) as mask:
-                    self.assertEqual(mask.size, (2160, 1215))
-                    self.assertEqual(mask.mode, "RGBA")
-                    alpha = mask.getchannel("A")
-                    alpha_minimum, alpha_maximum = alpha.getextrema()
-                    self.assertEqual(alpha_minimum, 0)
-                    self.assertGreater(alpha_maximum, 0)
-                    alpha_bounds = alpha.getbbox()
-                    self.assertIsNotNone(alpha_bounds)
-                    self.assertLess(alpha_bounds[0], alpha_bounds[2])
-                    self.assertNotEqual(alpha_bounds, (0, 0, *mask.size))
             for size in (180, 192, 512):
                 with Image.open(output_dir / f"icon-{size}.png") as icon:
                     self.assertEqual(icon.size, (size, size))
