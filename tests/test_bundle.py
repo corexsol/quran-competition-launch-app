@@ -67,12 +67,19 @@ class BundleTests(unittest.TestCase):
         self.assertIn("HTTPS", readme)
         self.assertIn("إضافة إلى الشاشة الرئيسية", readme)
         self.assertIn("وضع الطيران", readme)
+        self.assertIn("ثلاث نقرات", readme)
+        self.assertNotIn("شاشة الإحصاءات", readme)
 
     def test_operator_readme_prioritizes_github_pages_subpath(self):
         readme = (APP / "README.md").read_text(encoding="utf-8")
         self.assertIn("GitHub Pages", readme)
         self.assertIn("main", readme)
-        self.assertIn("https://USERNAME.github.io/REPOSITORY/launch-app/", readme)
+        self.assertIn(
+            "https://corexsol.github.io/quran-competition-launch-app/launch-app/",
+            readme,
+        )
+        self.assertNotIn("USERNAME", readme)
+        self.assertNotIn("REPOSITORY", readme)
         self.assertIn("المسارات النسبية", readme)
         self.assertIn("manifest.json", readme)
         self.assertIn("sw.js", readme)

@@ -23,6 +23,8 @@ async function listRuntimeFiles(directory, prefix = "./") {
 test("precache mirrors the physical runtime inventory and owns its lifecycle", async () => {
   const app = new URL("../launch-app/", import.meta.url);
   const source = await readFile(new URL("sw.js", app), "utf8");
+  assert.match(source, /quran-launch-/);
+  assert.match(source, /CACHE_NAME = `\$\{CACHE_PREFIX\}v2`/);
   const match = source.match(/Object\.freeze\((\[[\s\S]*?\])\)/);
   assert.ok(match, "PRECACHE_URLS array must be frozen");
   const urls = Function(`"use strict"; return (${match[1]});`)();

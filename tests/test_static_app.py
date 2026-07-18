@@ -28,7 +28,7 @@ class StaticAppTests(unittest.TestCase):
         self.assertEqual(manifest["display"], "standalone")
         self.assertEqual(manifest["orientation"], "landscape")
         self.assertEqual(manifest["theme_color"], "#1a4d2e")
-        self.assertEqual(manifest["background_color"], "#ffffff")
+        self.assertEqual(manifest["background_color"], "#0c4626")
         self.assertEqual([icon["sizes"] for icon in manifest["icons"]], ["192x192", "512x512"])
 
     def test_html_uses_exact_pdf_pages_for_two_screens(self):

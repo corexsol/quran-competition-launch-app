@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "quran-launch-";
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
 const PRECACHE_URLS = Object.freeze([
   "./",
   "./index.html",
@@ -8,12 +8,10 @@ const PRECACHE_URLS = Object.freeze([
   "./sw.js",
   "./manifest.json",
   "./README.md",
-  "./assets/title.png",
-  "./assets/minister.png",
-  "./assets/start-button.png",
-  "./assets/background-sides.png",
-  "./assets/background-medallion.png",
-  "./assets/statistics.png",
+  "./assets/page-1.png",
+  "./assets/page-1-gold-mask.png",
+  "./assets/page-2.png",
+  "./assets/page-2-gold-mask.png",
   "./assets/icon-180.png",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
