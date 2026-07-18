@@ -11,32 +11,33 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="assets/icon-180.png">
     <link rel="icon" type="image/png" href="assets/icon-192.png">
-    <link rel="preload" as="image" href="assets/background-sides.png">
-    <link rel="preload" as="image" href="assets/background-medallion.png">
-    <link rel="preload" as="image" href="assets/title.png">
-    <link rel="preload" as="image" href="assets/minister.png">
-    <link rel="preload" as="image" href="assets/start-button.png">
-    <link rel="preload" as="image" href="assets/statistics.png">
+    <link rel="preload" as="image" href="assets/page-1.png">
+    <link rel="preload" as="image" href="assets/page-2.png">
+    <link rel="preload" as="image" href="assets/page-1-gold-mask.png">
+    <link rel="preload" as="image" href="assets/page-2-gold-mask.png">
     <link rel="stylesheet" href="style.css">
     <script src="app.js" defer></script>
   </head>
   <body>
-    <main class="stage" aria-label="تطبيق التدشين">
-      <img class="background background-sides" src="assets/background-sides.png" alt="" draggable="false">
-      <img class="background background-medallion" src="assets/background-medallion.png" alt="" draggable="false">
-
+    <main id="stage" class="stage" aria-label="تطبيق التدشين">
       <section id="screen-start" class="screen screen-start" aria-hidden="false">
-        <img class="title-art" src="assets/title.png" alt="تدشين المرحلة الجديدة لمسابقة الملك عبدالعزيز الدولية لحفظ القرآن الكريم وتلاوته وتفسيره" draggable="false">
-        <img class="minister-art" src="assets/minister.png" alt="بإشراف ومتابعة معالي الشيخ الدكتور عبداللطيف بن عبدالعزيز آل الشيخ" draggable="false">
-        <button id="start-button" class="start-button" type="button" aria-label="ابدأ" disabled>
-          <img src="assets/start-button.png" alt="" draggable="false">
-        </button>
+        <img class="page-backdrop" src="assets/page-1.png" alt="" draggable="false">
+        <div class="page-frame">
+          <img class="page-art" src="assets/page-1.png" alt="صفحة تدشين مسابقة الملك عبدالعزيز الدولية" draggable="false">
+          <div class="gold-shimmer shimmer-page-one" aria-hidden="true"></div>
+          <button id="start-button" class="start-button" type="button" aria-label="ابدأ" disabled>
+            <span class="start-orbit" aria-hidden="true"></span>
+            <span class="start-halo" aria-hidden="true"></span>
+          </button>
+        </div>
       </section>
-
-      <section id="screen-statistics" class="screen screen-statistics" aria-hidden="true">
-        <img class="statistics-art" src="assets/statistics.png" alt="إحصاءات الدورة السادسة والأربعين: 133 دولة و547 مشاركا ومشاركة" draggable="false">
+      <section id="screen-ceremony" class="screen screen-ceremony" aria-hidden="true">
+        <img class="page-backdrop" src="assets/page-2.png" alt="" draggable="false">
+        <div class="page-frame">
+          <img class="page-art" src="assets/page-2.png" alt="هوية مسابقة الملك عبدالعزيز الدولية" draggable="false">
+          <div class="gold-shimmer shimmer-page-two" aria-hidden="true"></div>
+        </div>
       </section>
-
       <div class="gold-glow" aria-hidden="true"></div>
     </main>
   </body>

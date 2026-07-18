@@ -17,13 +17,21 @@ class StaticAppTests(unittest.TestCase):
         self.assertEqual(manifest["background_color"], "#ffffff")
         self.assertEqual([icon["sizes"] for icon in manifest["icons"]], ["192x192", "512x512"])
 
-    def test_html_has_exactly_two_screens_and_one_start_button(self):
+    def test_html_uses_exact_pdf_pages_for_two_screens(self):
         html = (APP / "index.html").read_text(encoding="utf-8")
         self.assertEqual(len(re.findall(r'class="screen ', html)), 2)
         self.assertEqual(len(re.findall(r'<button\b', html)), 1)
-        self.assertIn('id="start-button"', html)
         self.assertIn('id="screen-start"', html)
-        self.assertIn('id="screen-statistics"', html)
+        self.assertIn('id="screen-ceremony"', html)
+        self.assertEqual(html.count('src="assets/page-1.png"'), 2)
+        self.assertEqual(html.count('src="assets/page-2.png"'), 2)
+        self.assertIn('assets/page-1-gold-mask.png', html)
+        self.assertIn('assets/page-2-gold-mask.png', html)
+        self.assertNotIn('statistics.png', html)
+
+    def test_html_preserves_pwa_and_start_button_contracts(self):
+        html = (APP / "index.html").read_text(encoding="utf-8")
+        self.assertIn('id="start-button"', html)
         self.assertIn('apple-mobile-web-app-capable" content="yes', html)
         self.assertIn('apple-mobile-web-app-status-bar-style" content="black-translucent', html)
         self.assertIn('rel="apple-touch-icon" href="assets/icon-180.png"', html)
@@ -47,7 +55,24 @@ class StaticAppTests(unittest.TestCase):
             "transform:",
             "opacity:",
             "prefers-reduced-motion: reduce",
-            "width: clamp(300px",
+            "min-width: 300px",
+        ):
+            self.assertIn(contract, css)
+
+    def test_css_contains_contained_page_blurred_duplicate_and_overlay_motion(self):
+        css = (APP / "style.css").read_text(encoding="utf-8")
+        for contract in (
+            "aspect-ratio: 16 / 9",
+            "object-fit: cover",
+            "filter: blur(",
+            "min-width: 300px",
+            "min-height: 300px",
+            "top: 66.4%",
+            "page-1-gold-mask.png",
+            "page-2-gold-mask.png",
+            "@keyframes ring-rotate",
+            "@keyframes halo-pulse",
+            "@keyframes shimmer-sweep",
         ):
             self.assertIn(contract, css)
 
@@ -60,6 +85,35 @@ class StaticAppTests(unittest.TestCase):
         self.assertRegex(document_rule.group("body"), r"touch-action:\s*none\s*;")
         self.assertIsNotNone(button_rule)
         self.assertRegex(button_rule.group("body"), r"touch-action:\s*manipulation\s*;")
+
+    def test_css_globally_blocks_selection_and_callouts(self):
+        css = (APP / "style.css").read_text(encoding="utf-8")
+        global_rule = re.search(
+            r"\*,\s*\*::before,\s*\*::after\s*\{(?P<body>[^}]*)\}",
+            css,
+            re.DOTALL,
+        )
+
+        self.assertIsNotNone(global_rule)
+        for contract in (
+            r"-webkit-user-select:\s*none\s*;",
+            r"user-select:\s*none\s*;",
+            r"-webkit-touch-callout:\s*none\s*;",
+        ):
+            self.assertRegex(global_rule.group("body"), contract)
+
+    def test_css_has_forward_and_reverse_screen_state_hooks(self):
+        css = (APP / "style.css").read_text(encoding="utf-8")
+        for contract in (
+            "--transition-duration: 1900ms",
+            "--return-duration: 600ms",
+            ".is-launching .screen-start",
+            ".is-launching .screen-ceremony",
+            ".is-launched .screen-ceremony",
+            ".is-returning .screen-start",
+            ".is-returning .screen-ceremony",
+        ):
+            self.assertIn(contract, css)
 
 
 if __name__ == "__main__":

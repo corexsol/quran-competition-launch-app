@@ -16,15 +16,13 @@ EXPECTED_TOP_LEVEL = {
     "sw.js",
 }
 EXPECTED_ASSETS = {
-    "background-medallion.png",
-    "background-sides.png",
     "icon-180.png",
     "icon-192.png",
     "icon-512.png",
-    "minister.png",
-    "start-button.png",
-    "statistics.png",
-    "title.png",
+    "page-1-gold-mask.png",
+    "page-1.png",
+    "page-2-gold-mask.png",
+    "page-2.png",
 }
 
 
