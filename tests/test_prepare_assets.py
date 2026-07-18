@@ -31,9 +31,14 @@ class PrepareAssetsTests(unittest.TestCase):
                 with Image.open(output_dir / name) as mask:
                     self.assertEqual(mask.size, (2160, 1215))
                     self.assertEqual(mask.mode, "RGBA")
-                    alpha_bounds = mask.getchannel("A").getbbox()
+                    alpha = mask.getchannel("A")
+                    alpha_minimum, alpha_maximum = alpha.getextrema()
+                    self.assertEqual(alpha_minimum, 0)
+                    self.assertGreater(alpha_maximum, 0)
+                    alpha_bounds = alpha.getbbox()
                     self.assertIsNotNone(alpha_bounds)
                     self.assertLess(alpha_bounds[0], alpha_bounds[2])
+                    self.assertNotEqual(alpha_bounds, (0, 0, *mask.size))
             for size in (180, 192, 512):
                 with Image.open(output_dir / f"icon-{size}.png") as icon:
                     self.assertEqual(icon.size, (size, size))
