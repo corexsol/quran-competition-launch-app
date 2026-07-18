@@ -16,12 +16,15 @@ const PRECACHE_URLS = Object.freeze([
   "./assets/icon-192.png",
   "./assets/icon-512.png",
 ]);
+const PRECACHE_REQUESTS = Object.freeze(
+  PRECACHE_URLS.map((url) => new Request(url, { cache: "reload" })),
+);
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then((cache) => cache.addAll(PRECACHE_REQUESTS))
       .then(() => self.skipWaiting()),
   );
 });
