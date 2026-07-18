@@ -4,40 +4,92 @@
   const root = document.documentElement;
   const button = document.getElementById("start-button");
   const screenStart = document.getElementById("screen-start");
-  const screenStatistics = document.getElementById("screen-statistics");
+  const screenCeremony = document.getElementById("screen-ceremony");
   const criticalImages = Array.from(document.querySelectorAll("img"));
-  let launched = false;
+  const FORWARD_DURATION = 1900;
+  const RETURN_DURATION = 600;
+  const RETURN_WINDOW = 900;
+  const BLOCKED_EVENTS = [
+    "contextmenu",
+    "dragstart",
+    "selectstart",
+    "touchmove",
+    "gesturestart",
+    "gesturechange",
+    "gestureend",
+  ];
+  let state = "loading";
+  let transitionTimer = 0;
+  let returnTapTimes = [];
 
   const decodeImage = (image) => {
     if (typeof image.decode !== "function") {
       return Promise.resolve();
     }
-    return image.decode().catch(() => undefined);
+    return image.decode();
   };
 
-  Promise.all(criticalImages.map(decodeImage)).then(() => {
+  const finishStartReadiness = () => {
+    state = "start";
     root.classList.remove("app-loading");
     root.classList.add("app-ready");
     button.disabled = false;
-  });
-
-  const launch = () => {
-    if (launched || button.disabled) {
-      return;
-    }
-    launched = true;
-    button.disabled = true;
-    screenStart.setAttribute("aria-hidden", "true");
-    screenStatistics.setAttribute("aria-hidden", "false");
-    root.classList.add("is-launching");
-
-    window.setTimeout(() => {
-      root.classList.remove("is-launching");
-      root.classList.add("is-launched");
-    }, 1900);
   };
 
-  button.addEventListener("click", launch, { once: true });
+  const launch = () => {
+    if (state !== "start" || button.disabled) return;
+    state = "launching";
+    button.disabled = true;
+    returnTapTimes = [];
+    screenStart.setAttribute("aria-hidden", "true");
+    screenCeremony.setAttribute("aria-hidden", "false");
+    root.classList.add("is-launching");
+    window.clearTimeout(transitionTimer);
+    transitionTimer = window.setTimeout(() => {
+      if (state !== "launching") return;
+      root.classList.remove("is-launching");
+      root.classList.add("is-launched");
+      state = "ceremony";
+    }, FORWARD_DURATION);
+  };
+
+  const returnToStart = () => {
+    if (state !== "ceremony") return;
+    state = "returning";
+    returnTapTimes = [];
+    window.clearTimeout(transitionTimer);
+    root.classList.remove("is-launched", "is-launching");
+    root.classList.add("is-returning");
+    screenStart.setAttribute("aria-hidden", "false");
+    screenCeremony.setAttribute("aria-hidden", "true");
+    transitionTimer = window.setTimeout(() => {
+      if (state !== "returning") return;
+      root.classList.remove("is-returning");
+      button.disabled = false;
+      state = "start";
+    }, RETURN_DURATION);
+  };
+
+  const recordReturnTap = () => {
+    if (state !== "ceremony") return;
+    const time = window.performance.now();
+    returnTapTimes = returnTapTimes.filter(
+      (recorded) => time - recorded <= RETURN_WINDOW,
+    );
+    returnTapTimes.push(time);
+    if (returnTapTimes.length >= 3) returnToStart();
+  };
+
+  Promise.allSettled(criticalImages.map(decodeImage)).then(finishStartReadiness);
+
+  button.addEventListener("click", launch);
+  screenCeremony.addEventListener("pointerup", recordReturnTap);
+
+  for (const type of BLOCKED_EVENTS) {
+    document.addEventListener(type, (event) => event.preventDefault(), {
+      passive: false,
+    });
+  }
 
   if ("serviceWorker" in navigator) {
     window.addEventListener(
