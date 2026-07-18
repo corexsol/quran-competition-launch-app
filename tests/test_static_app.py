@@ -29,6 +29,13 @@ class StaticAppTests(unittest.TestCase):
         self.assertIn('rel="apple-touch-icon" href="assets/icon-180.png"', html)
         self.assertIn('maximum-scale=1, user-scalable=no', html)
 
+    def test_html_uses_precached_local_favicon(self):
+        html = (APP / "index.html").read_text(encoding="utf-8")
+        self.assertIn(
+            '<link rel="icon" type="image/png" href="assets/icon-192.png">',
+            html,
+        )
+
     def test_css_contains_hardening_and_gpu_transition_contracts(self):
         css = (APP / "style.css").read_text(encoding="utf-8")
         for contract in (
