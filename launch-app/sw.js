@@ -7,6 +7,7 @@ const PRECACHE_URLS = Object.freeze([
   "./app.js",
   "./sw.js",
   "./manifest.json",
+  "./README.md",
   "./assets/title.png",
   "./assets/minister.png",
   "./assets/start-button.png",

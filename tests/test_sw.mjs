@@ -1,29 +1,32 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("precache lists every runtime file and owns its lifecycle", async () => {
-  const source = await readFile(new URL("../launch-app/sw.js", import.meta.url), "utf8");
+async function listRuntimeFiles(directory, prefix = "./") {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      files.push(
+        ...(await listRuntimeFiles(
+          new URL(`${entry.name}/`, directory),
+          `${prefix}${entry.name}/`,
+        )),
+      );
+    } else if (entry.isFile()) {
+      files.push(`${prefix}${entry.name}`);
+    }
+  }
+  return files.sort();
+}
+
+test("precache mirrors the physical runtime inventory and owns its lifecycle", async () => {
+  const app = new URL("../launch-app/", import.meta.url);
+  const source = await readFile(new URL("sw.js", app), "utf8");
   const match = source.match(/Object\.freeze\((\[[\s\S]*?\])\)/);
   assert.ok(match, "PRECACHE_URLS array must be frozen");
   const urls = Function(`"use strict"; return (${match[1]});`)();
-  const expected = [
-    "./",
-    "./index.html",
-    "./style.css",
-    "./app.js",
-    "./sw.js",
-    "./manifest.json",
-    "./assets/title.png",
-    "./assets/minister.png",
-    "./assets/start-button.png",
-    "./assets/background-sides.png",
-    "./assets/background-medallion.png",
-    "./assets/statistics.png",
-    "./assets/icon-180.png",
-    "./assets/icon-192.png",
-    "./assets/icon-512.png",
-  ];
+  const expected = ["./", ...(await listRuntimeFiles(app))];
   assert.deepEqual(new Set(urls), new Set(expected));
   assert.equal(urls.length, expected.length);
   assert.equal(new Set(urls).size, urls.length);

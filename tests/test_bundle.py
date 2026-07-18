@@ -6,9 +6,36 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "launch-app"
+EXPECTED_TOP_LEVEL = {
+    "README.md",
+    "app.js",
+    "assets",
+    "index.html",
+    "manifest.json",
+    "style.css",
+    "sw.js",
+}
+EXPECTED_ASSETS = {
+    "background-medallion.png",
+    "background-sides.png",
+    "icon-180.png",
+    "icon-192.png",
+    "icon-512.png",
+    "minister.png",
+    "start-button.png",
+    "statistics.png",
+    "title.png",
+}
 
 
 class BundleTests(unittest.TestCase):
+    def test_bundle_inventory_is_exact(self):
+        self.assertEqual({path.name for path in APP.iterdir()}, EXPECTED_TOP_LEVEL)
+        self.assertEqual(
+            {path.name for path in (APP / "assets").iterdir()},
+            EXPECTED_ASSETS,
+        )
+
     def test_all_local_document_references_exist(self):
         html = (APP / "index.html").read_text(encoding="utf-8")
         references = re.findall(r'(?:src|href)="([^"]+)"', html)
@@ -18,7 +45,7 @@ class BundleTests(unittest.TestCase):
 
     def test_png_files_are_valid(self):
         pngs = sorted((APP / "assets").glob("*.png"))
-        self.assertEqual(len(pngs), 9)
+        self.assertEqual({path.name for path in pngs}, EXPECTED_ASSETS)
         for path in pngs:
             with Image.open(path) as image:
                 image.verify()
