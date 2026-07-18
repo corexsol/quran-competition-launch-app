@@ -25,9 +25,12 @@ test("precache lists every runtime file and owns its lifecycle", async () => {
     "./assets/icon-512.png",
   ];
   assert.deepEqual(new Set(urls), new Set(expected));
+  assert.equal(urls.length, expected.length);
+  assert.equal(new Set(urls).size, urls.length);
   assert.match(source, /cache\.addAll\(PRECACHE_URLS\)/);
   assert.match(source, /self\.skipWaiting\(\)/);
   assert.match(source, /self\.clients\.claim\(\)/);
   assert.match(source, /request\.mode === "navigate"/);
+  assert.match(source, /new URL\(request\.url\)\.origin !== self\.location\.origin/);
   assert.match(source, /caches\.match\(request, \{ ignoreSearch: true \}\)/);
 });
