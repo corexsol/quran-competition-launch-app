@@ -8,6 +8,20 @@ ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "launch-app"
 
 
+def css_block(css, marker):
+    marker_start = css.index(marker)
+    opening_brace = css.index("{", marker_start)
+    depth = 0
+    for index in range(opening_brace, len(css)):
+        if css[index] == "{":
+            depth += 1
+        elif css[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return css[opening_brace + 1 : index]
+    raise AssertionError(f"unterminated CSS block: {marker}")
+
+
 class StaticAppTests(unittest.TestCase):
     def test_manifest_is_arabic_standalone_landscape(self):
         manifest = json.loads((APP / "manifest.json").read_text(encoding="utf-8"))
@@ -36,6 +50,25 @@ class StaticAppTests(unittest.TestCase):
         self.assertIn('apple-mobile-web-app-status-bar-style" content="black-translucent', html)
         self.assertIn('rel="apple-touch-icon" href="assets/icon-180.png"', html)
         self.assertIn('maximum-scale=1, user-scalable=no', html)
+
+    def test_html_wraps_only_start_overlays_for_press_feedback(self):
+        html = (APP / "index.html").read_text(encoding="utf-8")
+        button = re.search(
+            r'<button\b[^>]*id="start-button"[^>]*>(?P<body>.*?)</button>',
+            html,
+            re.DOTALL,
+        )
+
+        self.assertIsNotNone(button)
+        feedback = re.fullmatch(
+            r'\s*<span class="start-feedback">\s*'
+            r'<span class="start-orbit" aria-hidden="true"></span>\s*'
+            r'<span class="start-halo" aria-hidden="true"></span>\s*'
+            r'</span>\s*',
+            button.group("body"),
+            re.DOTALL,
+        )
+        self.assertIsNotNone(feedback)
 
     def test_html_uses_precached_local_favicon(self):
         html = (APP / "index.html").read_text(encoding="utf-8")
@@ -114,6 +147,48 @@ class StaticAppTests(unittest.TestCase):
             ".is-returning .screen-ceremony",
         ):
             self.assertIn(contract, css)
+
+    def test_css_scales_only_start_feedback_on_press(self):
+        css = (APP / "style.css").read_text(encoding="utf-8")
+        feedback_rule = re.search(
+            r"\.start-feedback\s*\{(?P<body>[^}]*)\}", css, re.DOTALL
+        )
+        active_rule = re.search(
+            r"\.start-button:active:not\(:disabled\)\s+\.start-feedback\s*"
+            r"\{(?P<body>[^}]*)\}",
+            css,
+            re.DOTALL,
+        )
+
+        self.assertIsNotNone(feedback_rule)
+        self.assertRegex(
+            feedback_rule.group("body"), r"transition:\s*transform\s+100ms\b"
+        )
+        self.assertIsNotNone(active_rule)
+        self.assertRegex(active_rule.group("body"), r"transform:\s*scale\(0?\.96\)\s*;")
+        self.assertNotRegex(
+            css,
+            r"\.start-button:active:not\(:disabled\)\s*\{[^}]*scale\(",
+        )
+
+    def test_screen_states_and_transition_keyframes_are_opacity_only(self):
+        css = (APP / "style.css").read_text(encoding="utf-8")
+        for selector in (
+            ".screen-start {",
+            ".screen-ceremony {",
+            ".is-launched .screen-ceremony {",
+        ):
+            with self.subTest(selector=selector):
+                self.assertNotIn("transform:", css_block(css, selector))
+
+        for name in (
+            "start-exit",
+            "ceremony-enter",
+            "start-return",
+            "ceremony-exit",
+        ):
+            with self.subTest(keyframes=name):
+                self.assertNotIn("transform:", css_block(css, f"@keyframes {name}"))
 
 
 if __name__ == "__main__":

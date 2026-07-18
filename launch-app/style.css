@@ -72,7 +72,6 @@ img {
   z-index: 2;
   visibility: visible;
   opacity: 1;
-  transform: translate3d(0, 0, 0);
 }
 
 .screen-ceremony {
@@ -80,7 +79,6 @@ img {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  transform: translate3d(0, 18px, 0) scale(0.985);
 }
 
 .page-backdrop {
@@ -180,6 +178,18 @@ img {
   pointer-events: auto;
 }
 
+.start-feedback {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: scale(1);
+  transition: transform 100ms ease-out;
+}
+
+.start-button:active:not(:disabled) .start-feedback {
+  transform: scale(0.96);
+}
+
 .start-orbit,
 .start-halo {
   position: absolute;
@@ -245,7 +255,6 @@ img {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
-  transform: translate3d(0, 0, 0) scale(1);
 }
 
 .is-returning .screen-start {
@@ -327,44 +336,36 @@ img {
 
 @keyframes start-exit {
   from {
-    transform: translate3d(0, 0, 0);
     opacity: 1;
   }
   to {
-    transform: translate3d(0, -12px, 0);
     opacity: 0;
   }
 }
 
 @keyframes ceremony-enter {
   from {
-    transform: translate3d(0, 18px, 0) scale(0.985);
     opacity: 0;
   }
   to {
-    transform: translate3d(0, 0, 0) scale(1);
     opacity: 1;
   }
 }
 
 @keyframes start-return {
   from {
-    transform: translate3d(0, -8px, 0);
     opacity: 0;
   }
   to {
-    transform: translate3d(0, 0, 0);
     opacity: 1;
   }
 }
 
 @keyframes ceremony-exit {
   from {
-    transform: translate3d(0, 0, 0) scale(1);
     opacity: 1;
   }
   to {
-    transform: translate3d(0, 10px, 0) scale(0.99);
     opacity: 0;
   }
 }
