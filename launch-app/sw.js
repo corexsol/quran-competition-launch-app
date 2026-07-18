@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'quran-kiosk-';
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
 const LEGACY_CACHE_PREFIXES = Object.freeze([
   'quran-launch-',
   'quran-microsite-',
