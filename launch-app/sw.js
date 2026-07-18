@@ -1,6 +1,9 @@
-const CACHE_PREFIX = 'quran-microsite-';
-const CACHE_NAME = `${CACHE_PREFIX}v2`;
-const LEGACY_CACHE_PREFIXES = Object.freeze(['quran-launch-']);
+const CACHE_PREFIX = 'quran-kiosk-';
+const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const LEGACY_CACHE_PREFIXES = Object.freeze([
+  'quran-launch-',
+  'quran-microsite-',
+]);
 const APP_SHELL = Object.freeze([
   './',
   './index.html',
