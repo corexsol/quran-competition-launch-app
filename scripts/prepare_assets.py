@@ -1,105 +1,107 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
 from pathlib import Path
 
 import pypdfium2 as pdfium
-from PIL import Image, ImageOps
+from PIL import Image, ImageChops, ImageFilter, ImageOps
 
 
-@dataclass(frozen=True)
-class AssetSpec:
-    source: str
-    output: str
-    scale: float
-    trim: bool = True
-
-
-ASSETS = (
-    AssetSpec("Asset 3.pdf", "title.png", 4.0),
-    AssetSpec("Asset 2.pdf", "minister.png", 4.0),
-    AssetSpec("Asset 1.pdf", "start-button.png", 3.0),
-    AssetSpec("Asset 4.pdf", "background-sides.png", 1.125, False),
-    AssetSpec("Asset 5.pdf", "background-medallion.png", 1.5),
-    AssetSpec("Asset 1022.pdf", "statistics.png", 2.5),
-)
-
-OUTPUT_NAMES = tuple(spec.output for spec in ASSETS) + (
+PAGE_SCALE = 1.125
+PAGE_SIZE = (2160, 1215)
+OUTPUT_NAMES = (
+    "page-1.png",
+    "page-2.png",
+    "page-1-gold-mask.png",
+    "page-2-gold-mask.png",
     "icon-180.png",
     "icon-192.png",
     "icon-512.png",
 )
+GOLD_REGIONS = {
+    0: ((650, 280, 1510, 590),),
+    1: ((610, 250, 1550, 900),),
+}
 
 
-def render_pdf(path: Path, scale: float, page_index: int = 0) -> Image.Image:
+def render_pdf(path: Path, scale: float, page_index: int) -> Image.Image:
     document = pdfium.PdfDocument(str(path))
     page = document[page_index]
     bitmap = page.render(
         scale=scale,
-        fill_color=(255, 255, 255, 0),
+        fill_color=(12, 70, 38, 255),
         rev_byteorder=True,
     )
-    return bitmap.to_pil().convert("RGBA")
+    image = bitmap.to_pil().convert("RGB")
+    if image.size != PAGE_SIZE:
+        raise ValueError(f"Unexpected rendered page size: {image.size}")
+    return image
 
 
-def trim_transparent(image: Image.Image, padding: int = 24) -> Image.Image:
-    alpha = image.getchannel("A")
-    bounds = alpha.getbbox()
-    if bounds is None:
-        raise ValueError("Rendered artwork is fully transparent")
-    left, top, right, bottom = bounds
-    return image.crop(
-        (
-            max(0, left - padding),
-            max(0, top - padding),
-            min(image.width, right + padding),
-            min(image.height, bottom + padding),
-        )
-    )
+def create_gold_mask(
+    image: Image.Image,
+    regions: tuple[tuple[int, int, int, int], ...],
+) -> Image.Image:
+    alpha = Image.new("L", image.size, 0)
+    for bounds in regions:
+        crop = image.crop(bounds).convert("HSV")
+        hue, saturation, value = crop.split()
+        hue_band = hue.point(lambda pixel: 255 if 8 <= pixel <= 45 else 0)
+        saturation_band = saturation.point(lambda pixel: 255 if pixel >= 45 else 0)
+        value_band = value.point(lambda pixel: pixel if pixel >= 115 else 0)
+        mask = ImageChops.multiply(
+            ImageChops.multiply(hue_band, saturation_band),
+            value_band,
+        ).filter(ImageFilter.GaussianBlur(0.6))
+        alpha.paste(mask, bounds[:2])
+    result = Image.new("RGBA", image.size, (255, 255, 255, 0))
+    result.putalpha(alpha)
+    return result
 
 
 def save_png(image: Image.Image, path: Path) -> None:
     image.save(path, format="PNG", optimize=True, compress_level=9)
 
 
-def create_icons(master_pdf: Path, output_dir: Path) -> None:
-    master_page = render_pdf(master_pdf, scale=1.0, page_index=1).convert("RGB")
-    logo_crop = master_page.crop((720, 245, 1200, 725))
+def create_icons(page_two: Image.Image, output_dir: Path) -> None:
+    emblem = page_two.crop((675, 235, 1485, 1045))
     square = ImageOps.fit(
-        logo_crop,
+        emblem,
         (512, 512),
         method=Image.Resampling.LANCZOS,
-        centering=(0.5, 0.5),
+        centering=(0.5, 0.48),
     )
     for size in (180, 192, 512):
-        icon = square.resize((size, size), Image.Resampling.LANCZOS)
-        save_png(icon, output_dir / f"icon-{size}.png")
+        save_png(
+            square.resize((size, size), Image.Resampling.LANCZOS),
+            output_dir / f"icon-{size}.png",
+        )
 
 
-def prepare_assets(source_dir: Path, output_dir: Path) -> None:
+def prepare_assets(master_pdf: Path, output_dir: Path) -> None:
+    if not master_pdf.is_file():
+        raise FileNotFoundError(master_pdf)
     output_dir.mkdir(parents=True, exist_ok=True)
-    for spec in ASSETS:
-        source = source_dir / spec.source
-        if not source.is_file():
-            raise FileNotFoundError(source)
-        image = render_pdf(source, spec.scale)
-        if spec.trim:
-            image = trim_transparent(image)
-        save_png(image, output_dir / spec.output)
-    create_icons(source_dir / "تطبيق التدشين.pdf", output_dir)
+    pages = [render_pdf(master_pdf, PAGE_SCALE, index) for index in (0, 1)]
+    for number, page in enumerate(pages, start=1):
+        save_png(page, output_dir / f"page-{number}.png")
+        save_png(
+            create_gold_mask(page, GOLD_REGIONS[number - 1]),
+            output_dir / f"page-{number}-gold-mask.png",
+        )
+    create_icons(pages[1], output_dir)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source-dir", type=Path, required=True)
+    parser.add_argument("--master-pdf", type=Path, required=True)
     parser.add_argument(
         "--output-dir",
         type=Path,
         default=Path(__file__).resolve().parents[1] / "launch-app" / "assets",
     )
     arguments = parser.parse_args()
-    prepare_assets(arguments.source_dir, arguments.output_dir)
+    prepare_assets(arguments.master_pdf, arguments.output_dir)
 
 
 if __name__ == "__main__":
