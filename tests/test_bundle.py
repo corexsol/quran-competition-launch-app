@@ -46,6 +46,16 @@ class BundleTests(unittest.TestCase):
             with Image.open(path) as image:
                 image.verify()
 
+    def test_page_images_have_no_white_left_edge_seam(self):
+        for name in ("page-1.png", "page-2.png"):
+            with Image.open(APP / "assets" / name).convert("RGB") as image:
+                near_white = sum(
+                    1
+                    for y in range(image.height)
+                    if min(image.getpixel((0, y))) >= 235
+                )
+                self.assertLess(near_white, image.height // 4, name)
+
     def test_runtime_has_no_remote_dependencies_and_is_under_budget(self):
         runtime_files = [
             APP / "index.html",

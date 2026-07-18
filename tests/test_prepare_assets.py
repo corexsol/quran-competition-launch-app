@@ -27,6 +27,12 @@ class PrepareAssetsTests(unittest.TestCase):
                 with Image.open(output_dir / name) as page:
                     self.assertEqual(page.size, (2160, 1215))
                     self.assertEqual(page.mode, "RGB")
+                    near_white = sum(
+                        1
+                        for y in range(page.height)
+                        if min(page.getpixel((0, y))) >= 235
+                    )
+                    self.assertLess(near_white, page.height // 4)
             for size in (180, 192, 512):
                 with Image.open(output_dir / f"icon-{size}.png") as icon:
                     self.assertEqual(icon.size, (size, size))

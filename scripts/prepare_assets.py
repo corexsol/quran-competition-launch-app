@@ -9,6 +9,7 @@ from PIL import Image, ImageOps
 
 PAGE_SCALE = 1.125
 PAGE_SIZE = (2160, 1215)
+EDGE_REPAIR_COLUMNS = 4
 OUTPUT_NAMES = (
     "page-1.png",
     "page-2.png",
@@ -28,6 +29,21 @@ def render_pdf(path: Path, scale: float, page_index: int) -> Image.Image:
     if image.size != PAGE_SIZE:
         raise ValueError(f"Unexpected rendered page size: {image.size}")
     return image
+
+
+def repair_left_edge(image: Image.Image) -> Image.Image:
+    repaired = image.copy()
+    donor = image.crop(
+        (EDGE_REPAIR_COLUMNS, 0, EDGE_REPAIR_COLUMNS + 1, image.height)
+    )
+    repaired.paste(
+        donor.resize(
+            (EDGE_REPAIR_COLUMNS, image.height),
+            Image.Resampling.NEAREST,
+        ),
+        (0, 0),
+    )
+    return repaired
 
 
 def save_png(image: Image.Image, path: Path) -> None:
@@ -53,7 +69,10 @@ def prepare_assets(master_pdf: Path, output_dir: Path) -> None:
     if not master_pdf.is_file():
         raise FileNotFoundError(master_pdf)
     output_dir.mkdir(parents=True, exist_ok=True)
-    pages = [render_pdf(master_pdf, PAGE_SCALE, index) for index in (0, 1)]
+    pages = [
+        repair_left_edge(render_pdf(master_pdf, PAGE_SCALE, index))
+        for index in (0, 1)
+    ]
     for number, page in enumerate(pages, start=1):
         save_png(page, output_dir / f"page-{number}.png")
     create_icons(pages[1], output_dir)
