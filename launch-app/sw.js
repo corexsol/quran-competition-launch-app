@@ -1,5 +1,6 @@
 const CACHE_PREFIX = 'quran-microsite-';
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
+const LEGACY_CACHE_PREFIXES = Object.freeze(['quran-launch-']);
 const APP_SHELL = Object.freeze([
   './',
   './index.html',
@@ -23,7 +24,10 @@ self.addEventListener('activate', (event) => {
       .keys()
       .then((keys) => Promise.all(
         keys
-          .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
+          .filter((key) => (
+            key.startsWith(CACHE_PREFIX)
+            || LEGACY_CACHE_PREFIXES.some((prefix) => key.startsWith(prefix))
+          ) && key !== CACHE_NAME)
           .map((key) => caches.delete(key)),
       ))
       .then(() => self.clients.claim()),
@@ -38,10 +42,12 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
-    caches.match(request, { ignoreSearch: true }).then((cached) => {
-      if (cached) return cached;
-      if (request.mode === 'navigate') return caches.match('./index.html');
-      return fetch(request);
-    }),
+    caches.open(CACHE_NAME).then((cache) => (
+      cache.match(request, { ignoreSearch: true }).then((cached) => {
+        if (cached) return cached;
+        if (request.mode === 'navigate') return cache.match('./index.html');
+        return fetch(request);
+      })
+    )),
   );
 });
