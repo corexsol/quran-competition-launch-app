@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="app-loading">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1a4d2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="تطبيق التدشين">
+    <title>تطبيق تدشين مسابقة الملك عبدالعزيز الدولية</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icon-180.png">
+    <link rel="preload" as="image" href="assets/background-sides.png">
+    <link rel="preload" as="image" href="assets/background-medallion.png">
+    <link rel="preload" as="image" href="assets/title.png">
+    <link rel="preload" as="image" href="assets/minister.png">
+    <link rel="preload" as="image" href="assets/start-button.png">
+    <link rel="preload" as="image" href="assets/statistics.png">
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main class="stage" aria-label="تطبيق التدشين">
+      <img class="background background-sides" src="assets/background-sides.png" alt="" draggable="false">
+      <img class="background background-medallion" src="assets/background-medallion.png" alt="" draggable="false">
+
+      <section id="screen-start" class="screen screen-start" aria-hidden="false">
+        <img class="title-art" src="assets/title.png" alt="تدشين المرحلة الجديدة لمسابقة الملك عبدالعزيز الدولية لحفظ القرآن الكريم وتلاوته وتفسيره" draggable="false">
+        <img class="minister-art" src="assets/minister.png" alt="بإشراف ومتابعة معالي الشيخ الدكتور عبداللطيف بن عبدالعزيز آل الشيخ" draggable="false">
+        <button id="start-button" class="start-button" type="button" aria-label="ابدأ" disabled>
+          <img src="assets/start-button.png" alt="" draggable="false">
+        </button>
+      </section>
+
+      <section id="screen-statistics" class="screen screen-statistics" aria-hidden="true">
+        <img class="statistics-art" src="assets/statistics.png" alt="إحصاءات الدورة السادسة والأربعين: 133 دولة و547 مشاركا ومشاركة" draggable="false">
+      </section>
+
+      <div class="gold-glow" aria-hidden="true"></div>
+    </main>
+  </body>
+</html>

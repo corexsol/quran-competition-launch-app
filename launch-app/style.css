@@ -1,0 +1,240 @@
+:root {
+  color-scheme: light;
+  --green: #1a4d2e;
+  --gold: #c9a646;
+  --transition-duration: 1900ms;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: #ffffff;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  cursor: none;
+}
+
+body {
+  display: grid;
+  place-items: center;
+}
+
+button,
+img {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #ffffff;
+}
+
+@supports (height: 100dvh) {
+  .stage {
+    height: 100dvh;
+  }
+}
+
+.background {
+  position: absolute;
+  z-index: -2;
+  pointer-events: none;
+}
+
+.background-sides {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: auto;
+  transform: translateY(-50%);
+  opacity: 0.88;
+}
+
+.background-medallion {
+  top: 50%;
+  left: 50%;
+  width: min(64vmin, 620px);
+  height: min(64vmin, 620px);
+  transform: translate(-50%, -50%);
+  opacity: 0.48;
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  padding:
+    max(20px, env(safe-area-inset-top))
+    max(36px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom))
+    max(36px, env(safe-area-inset-left));
+}
+
+.screen-start {
+  z-index: 2;
+  display: grid;
+  grid-template-rows: 31% 25% 44%;
+  justify-items: center;
+  align-items: center;
+}
+
+.title-art,
+.minister-art,
+.statistics-art,
+.start-button img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.title-art {
+  align-self: end;
+  width: min(46vw, 470px);
+  max-height: 215px;
+}
+
+.minister-art {
+  width: min(41vw, 420px);
+  max-height: 190px;
+}
+
+.start-button {
+  align-self: start;
+  width: clamp(300px, 30vw, 330px);
+  aspect-ratio: 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  outline: 0;
+  background: transparent;
+  color: transparent;
+  appearance: none;
+  touch-action: manipulation;
+  transform: translateZ(0) scale(1);
+  transition: transform 100ms ease-out, opacity 180ms ease-out;
+}
+
+.start-button:active:not(:disabled) {
+  transform: translateZ(0) scale(0.96);
+}
+
+.start-button:focus,
+.start-button:focus-visible {
+  outline: 0;
+}
+
+.start-button:disabled {
+  opacity: 0.92;
+}
+
+.app-loading .start-button {
+  pointer-events: none;
+}
+
+.app-ready .start-button:not(:disabled) {
+  pointer-events: auto;
+}
+
+.screen-statistics {
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  visibility: hidden;
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+}
+
+.statistics-art {
+  width: min(76vw, 690px);
+  max-height: min(84vh, 680px);
+}
+
+.gold-glow {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  top: 72%;
+  width: 18vmin;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 243, 183, 0.96) 0%, rgba(213, 171, 60, 0.68) 32%, rgba(213, 171, 60, 0) 72%);
+  opacity: 0;
+  transform: translate3d(-50%, -50%, 0) scale(0.2);
+}
+
+.is-launching .start-button {
+  animation: button-press 140ms ease-out both;
+}
+
+.is-launching .gold-glow {
+  animation: glow-expand 1400ms cubic-bezier(0.22, 0.8, 0.24, 1) both;
+}
+
+.is-launching .screen-start {
+  animation: start-exit 900ms 180ms ease-in both;
+}
+
+.is-launching .screen-statistics {
+  visibility: visible;
+  animation: statistics-enter 850ms 820ms cubic-bezier(0.2, 0.8, 0.25, 1) both;
+}
+
+.is-launched .screen-start {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.is-launched .screen-statistics {
+  visibility: visible;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@keyframes button-press {
+  to { transform: translateZ(0) scale(0.96); }
+}
+
+@keyframes glow-expand {
+  0% { opacity: 0; transform: translate3d(-50%, -50%, 0) scale(0.2); }
+  20% { opacity: 1; }
+  72% { opacity: 0.78; }
+  100% { opacity: 0; transform: translate3d(-50%, -50%, 0) scale(14); }
+}
+
+@keyframes start-exit {
+  to { opacity: 0; transform: translate3d(0, -12px, 0); }
+}
+
+@keyframes statistics-enter {
+  from { opacity: 0; transform: translate3d(0, 24px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --transition-duration: 350ms; }
+  .is-launching .start-button,
+  .is-launching .gold-glow { animation: none; }
+  .is-launching .screen-start { animation: start-exit 250ms ease-out both; }
+  .is-launching .screen-statistics { animation: statistics-enter 300ms 100ms ease-out both; }
+}
