@@ -169,7 +169,8 @@ img {
   border-radius: 50%;
   transform: translate3d(-50%, -50%, 0);
   opacity: 0.28;
-  animation: outline-breathe 3.2s ease-in-out infinite;
+  animation: outline-breathe 2.8s ease-in-out infinite;
+  will-change: transform, opacity;
   pointer-events: none;
 }
 
@@ -214,10 +215,12 @@ img {
 @keyframes outline-breathe {
   0%,
   100% {
-    opacity: 0.28;
+    transform: translate3d(-50%, -50%, 0) scale(0.96);
+    opacity: 0.35;
   }
   50% {
-    opacity: 0.74;
+    transform: translate3d(-50%, -50%, 0) scale(1.05);
+    opacity: 0.88;
   }
 }
 

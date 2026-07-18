@@ -108,7 +108,7 @@ class StaticAppTests(unittest.TestCase):
             "min-height: 300px",
             "top: 66.4%",
             "border: 2px solid rgba(234, 207, 119, 0.68)",
-            "animation: outline-breathe 3.2s ease-in-out infinite",
+            "animation: outline-breathe 2.8s ease-in-out infinite",
         ):
             self.assertIn(contract, css)
         for removed in (
@@ -125,7 +125,9 @@ class StaticAppTests(unittest.TestCase):
             "box-shadow:",
         ):
             self.assertNotIn(removed, css)
-        self.assertNotIn("transform:", css_block(css, "@keyframes outline-breathe"))
+        outline_animation = css_block(css, "@keyframes outline-breathe")
+        self.assertIn("scale(0.96)", outline_animation)
+        self.assertIn("scale(1.05)", outline_animation)
 
     def test_css_blocks_viewport_gestures_while_preserving_button_taps(self):
         css = (APP / "style.css").read_text(encoding="utf-8")
