@@ -51,6 +51,16 @@ class StaticAppTests(unittest.TestCase):
         ):
             self.assertIn(contract, css)
 
+    def test_css_blocks_viewport_gestures_while_preserving_button_taps(self):
+        css = (APP / "style.css").read_text(encoding="utf-8")
+        document_rule = re.search(r"html,\s*body\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
+        button_rule = re.search(r"\.start-button\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
+
+        self.assertIsNotNone(document_rule)
+        self.assertRegex(document_rule.group("body"), r"touch-action:\s*none\s*;")
+        self.assertIsNotNone(button_rule)
+        self.assertRegex(button_rule.group("body"), r"touch-action:\s*manipulation\s*;")
+
 
 if __name__ == "__main__":
     unittest.main()
